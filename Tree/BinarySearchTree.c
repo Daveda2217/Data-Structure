@@ -14,6 +14,16 @@ typedef struct _BSTNode
     struct _BSTNode *right_child;
 } BSTNode;
 
+BSTNode *CreateNode(int key)
+{
+    BSTNode *node = (BSTNode *)malloc(sizeof(BSTNode));
+    node->key = key;
+    node->left_child = NULL;
+    node->right_child = NULL;
+
+    return node;
+}
+
 // initial min & max == INT_MIN & INT_MAX
 bool Verify(BSTNode *root, int min, int max)
 {
@@ -36,9 +46,9 @@ BSTNode *search_recursion(BSTNode *root, int key)
     if (root == NULL || root->key == key)
         return root;
     else if (root->key > key)
-        return search(root->left_child, key);
+        return search_recursion(root->left_child, key);
     else
-        return search(root->right_child, key);
+        return search_recursion(root->right_child, key);
 }
 
 BSTNode *search_iteration(BSTNode *root, int key)
@@ -58,24 +68,21 @@ BSTNode *search_iteration(BSTNode *root, int key)
     return cur;
 }
 
-void Insert_recursion(BSTNode *root, int key)
+BSTNode *Insert_recursion(BSTNode *root, int key)
 {
-    if (root->key == key)
-        exit(1); // no duplicated number
-    else if (root->key > key)
+    if (root == NULL)
     {
-        if (root->left_child == NULL)
-            CreateLeftSubtree(root, key);
-        else
-            Insert(root->left_child, key);
+        return CreateNode(key);
+    }
+    if (root->key > key)
+    {
+        root->left_child = Insert_recursion(root->left_child, key);
     }
     else
     {
-        if (root->right_child == NULL)
-            CreateRightSubtree(root, key);
-        else
-            Insert(root->right_child, key);
+        root->right_child = Insert_recursion(root->right_child, key);
     }
+    return root;
 }
 
 void Insert_iteration(BSTNode *root, int key)
@@ -116,8 +123,6 @@ Delete Function
 - the biggest one in the left subtree
 - the smallest one in the right subtree
 */
-
-// handle three above possible cases
 void Remove(BSTNode *root, int key)
 {
     BSTNode *cur = root, *parent = NULL;
@@ -131,9 +136,6 @@ void Remove(BSTNode *root, int key)
         else
             cur = cur->right_child;
     }
-
-    if (cur == NULL)
-        exit(1); // There is no key in BST
 
     // case 1
     if (cur->left_child == NULL && cur->right_child == NULL)
@@ -183,5 +185,20 @@ void Remove(BSTNode *root, int key)
         cur->key = succ->key;
         cur = succ;
     }
-    DestoryNode(cur);
+    free(cur);
+}
+
+void free_tree(BSTNode *root)
+{
+    if (root == NULL)
+        return;
+    if (root->left_child == NULL && root->right_child == NULL)
+        free(root);
+    else
+    {
+        if (root->left_child != NULL)
+            free_tree(root->left_child);
+        if (root->right_child != NULL)
+            free_tree(root->right_child);
+    }
 }
